@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MaxTraining Coach - Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --primary-gold: #ffd700;
+            --dark-bg: #1a1a1a;
+            --card-bg: #ffffff;
+            --text-dark: #000000;
+            --text-light: #999999;
+        }
+
+        body {
+            background: linear-gradient(135deg, #e8d5c4 0%, #d4c4b8 100%);
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: white;
+            min-height: 100vh;
+            padding: 2rem 0;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            position: fixed;
+            width: 280px;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.is-hidden-mobile {
+            transform: translateX(-100%);
+        }
+
+        @media (min-width: 1024px) {
+            .sidebar.is-hidden-mobile {
+                transform: translateX(0);
+            }
+        }
+
+        .logo-container {
+            text-align: center;
+            padding: 0 2rem 2rem;
+            border-bottom: 2px solid #f5f5f5;
+            margin-bottom: 2rem;
+        }
+
+        .logo-container img {
+            width: 120px;
+            height: auto;
+            border-radius: 100px;
+        }
+
+        .menu-list a {
+            color: var(--text-dark);
+            padding: 1rem 2rem;
+            border-radius: 0;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+
+        .menu-list a:hover {
+            background-color: #fff9e6;
+            border-left-color: var(--primary-gold);
+        }
+
+        .menu-list a.is-active {
+            background-color: #fff9e6;
+            color: var(--text-dark);
+            border-left-color: var(--primary-gold);
+            font-weight: 700;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            padding: 2rem;
+            transition: margin-left 0.3s ease;
+        }
+
+        @media (max-width: 1023px) {
+            .main-content {
+                margin-left: 0;
+            }
+        }
+
+        /* Stats Cards */
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon.is-gold {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            color: var(--text-dark);
+        }
+
+        .stat-icon.is-blue {
+            background: linear-gradient(135deg, #4a90e2 0%, #5ba3f5 100%);
+            color: white;
+        }
+
+        .stat-icon.is-green {
+            background: linear-gradient(135deg, #50c878 0%, #66d98b 100%);
+            color: white;
+        }
+
+        .stat-icon.is-purple {
+            background: linear-gradient(135deg, #9b59b6 0%, #b06fc9 100%);
+            color: white;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        /* Chart Card */
+        .chart-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+        }
+
+        .chart-card h3 {
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text-dark);
+        }
+
+        /* Students Section */
+        .students-section {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .students-section h3 {
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text-dark);
+        }
+
+        .student-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .student-item {
+            text-align: center;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        .student-item:hover {
+            transform: scale(1.05);
+        }
+
+        .student-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--primary-gold);
+            margin-bottom: 0.75rem;
+        }
+
+        .student-name {
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.9rem;
+        }
+
+        /* Mobile Menu Toggle */
+        .mobile-menu-toggle {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            background: var(--primary-gold);
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: var(--text-dark);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            cursor: pointer;
+            z-index: 100;
+        }
+
+        @media (max-width: 1023px) {
+            .mobile-menu-toggle {
+                display: flex;
+            }
+        }
+
+        /* Header */
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .notification-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 10px;
+            height: 10px;
+            background: #e74c3c;
+            border-radius: 50%;
+        }
+
+        .profile-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem;
+            background: white;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .profile-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .profile-name {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .action-btn {
+            background: white;
+            border: 2px solid var(--primary-gold);
+            color: var(--text-dark);
+            padding: 1rem;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .action-btn:hover {
+            background: var(--primary-gold);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+        }
+
+        /* Overlay for mobile menu */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 99;
+        }
+
+        .sidebar-overlay.is-active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar is-hidden-mobile" id="sidebar">
+        <div class="logo-container">
+            <img src="/images/logo.png" alt="MaxTraining Logo">
+        </div>
+        <aside class="menu">
+            <ul class="menu-list">
+                <li><a class="is-active" onclick="showSection('dashboard')"><i class="fas fa-home mr-3"></i> Tableau de bord</a></li>
+                <li><a onclick="showSection('clients')"><i class="fas fa-users mr-3"></i> Clients</a></li>
+                <li><a onclick="showSection('coaching')"><i class="fas fa-dumbbell mr-3"></i> Coaching</a></li>
+                <li><a onclick="showSection('programme')"><i class="fas fa-calendar-alt mr-3"></i> Programme</a></li>
+                <li><a onclick="showSection('reservations')"><i class="fas fa-clock mr-3"></i> Réservations</a></li>
+                <li><a onclick="showSection('stats')"><i class="fas fa-chart-bar mr-3"></i> Statistiques</a></li>
+                <li><a onclick="showSection('monetisation')"><i class="fas fa-money-bill mr-3"></i> Monétisation</a></li>
+            </ul>
+        </aside>
+    </aside>
+
+    <!-- Sidebar Overlay for Mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <h1 class="dashboard-title">Tableau de bord</h1>
+            <div class="header-actions">
+                <button class="notification-btn">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge"></span>
+                </button>
+                <div class="profile-btn">
+                    <img src="/images/MAXCARSL.png" alt="Coach" class="profile-avatar">
+                    <span class="profile-name">Coach Max</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <button class="action-btn">
+                <i class="fas fa-plus"></i>
+                Nouveau Client
+            </button>
+            <button class="action-btn">
+                <i class="fas fa-calendar-plus"></i>
+                Créer un Programme
+            </button>
+            <button class="action-btn">
+                <i class="fas fa-paper-plane"></i>
+                Envoyer un Message
+            </button>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="columns is-multiline mb-5">
+            <div class="column is-3-desktop is-6-tablet">
+                <div class="stat-card">
+                    <div class="stat-icon is-gold">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-value">48</div>
+                    <div class="stat-label">Clients Actifs</div>
+                </div>
+            </div>
+            <div class="column is-3-desktop is-6-tablet">
+                <div class="stat-card">
+                    <div class="stat-icon is-blue">
+                        <i class="fas fa-dumbbell"></i>
+                    </div>
+                    <div class="stat-value">156</div>
+                    <div class="stat-label">Séances ce mois</div>
+                </div>
+            </div>
+            <div class="column is-3-desktop is-6-tablet">
+                <div class="stat-card">
+                    <div class="stat-icon is-green">
+                        <i class="fas fa-chart-simple"></i>
+                    </div>
+                    <div class="stat-value">1200€</div>
+                    <div class="stat-label">Revenu mensuel</div>
+                </div>
+            </div>
+            <div class="column is-3-desktop is-6-tablet">
+                <div class="stat-card">
+                    <div class="stat-icon is-purple">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="stat-value">4.8</div>
+                    <div class="stat-label">Satisfaction Moyenne</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="columns">
+            <div class="column is-8">
+                <div class="chart-card">
+                    <h3><i class="fas fa-chart-bar mr-2"></i> Nouveaux clients au cours du des années</h3>
+                    <canvas id="usersChart"></canvas>
+                </div>
+            </div>
+            <div class="column is-4">
+                <div class="chart-card">
+                    <h3><i class="fas fa-pie-chart mr-2"></i> Répartition des séances</h3>
+                    <canvas id="sessionsChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Students Section -->
+        <div class="students-section">
+            <h3><i class="fas fa-graduation-cap mr-2"></i> Mes Élèves</h3>
+            <div class="student-grid">
+                <div class="student-item">
+                    <img src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=200" alt="Student" class="student-avatar">
+                    <div class="student-name">Yann </div>
+                </div>
+                <div class="student-item">
+                    <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200" alt="Student" class="student-avatar">
+                    <div class="student-name">Julie </div>
+                </div>
+                <div class="student-item">
+                    <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200" alt="Student" class="student-avatar">
+                    <div class="student-name">Max </div>
+                </div>
+                <div class="student-item">
+                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200" alt="Student" class="student-avatar">
+                    <div class="student-name">Emma </div>
+                </div>
+                <div class="student-item">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200" alt="Student" class="student-avatar">
+                    <div class="student-name">Matthias </div>
+                </div>
+                <div class="student-item">
+                    <img src="https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=200" alt="Student" class="student-avatar">
+                    <div class="student-name">Laura </div>
+                </div>
+                <div class="student-item">
+                    <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200" alt="Student" class="student-avatar">
+                    <div class="student-name">Alex </div>
+                </div>
+                <div class="student-item">
+                    <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200" alt="Student" class="student-avatar">
+                    <div class="student-name">Camille </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Menu Toggle -->
+    <div class="mobile-menu-toggle" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <script>
+        // Toggle Sidebar for Mobile
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('is-hidden-mobile');
+            overlay.classList.toggle('is-active');
+        }
+
+        // Section Navigation
+        function showSection(section) {
+            const menuItems = document.querySelectorAll('.menu-list a');
+            menuItems.forEach(item => item.classList.remove('is-active'));
+            event.target.closest('a').classList.add('is-active');
+            
+            // Close mobile menu after selection
+            if (window.innerWidth < 1024) {
+                toggleSidebar();
+            }
+        }
+
+        // Users Chart
+        const usersCtx = document.getElementById('usersChart').getContext('2d');
+        new Chart(usersCtx, {
+            type: 'bar',
+            data: {
+                labels: ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'],
+                datasets: [{
+                    label: 'Nouveaux utilisateurs',
+                    data: [120, 250, 380, 520, 580, 680, 750],
+                    backgroundColor: '#4a7ba7',
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            display: true,
+                            color: '#f0f0f0'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+
+        // Sessions Chart
+        const sessionsCtx = document.getElementById('sessionsChart').getContext('2d');
+        new Chart(sessionsCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Cardio', 'renforcement', 'haltérophilie', 'mobilité'],
+                datasets: [{
+                    data: [35, 30, 20, 15],
+                    backgroundColor: ['#ffd700', '#4a7ba7', '#50c878', '#9b59b6'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 15,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const toggle = document.querySelector('.mobile-menu-toggle');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            if (!sidebar.contains(event.target) && !toggle.contains(event.target) && !sidebar.classList.contains('is-hidden-mobile')) {
+                if (window.innerWidth < 1024) {
+                    toggleSidebar();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
