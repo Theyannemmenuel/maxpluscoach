@@ -17,7 +17,7 @@
         }
 
         body {
-            background: linear-gradient(135deg, #e8d5c4 0%, #d4c4b8 100%);
+            background: linear-gradient(135deg, #b1b1b1 0%, #69635f 100%);
             min-height: 100vh;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
         }
@@ -156,12 +156,28 @@
             padding: 2rem;
             box-shadow: 0 4px 15px rgba(0,0,0,0.08);
             margin-bottom: 2rem;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
         }
 
         .chart-card h3 {
             font-weight: 700;
             margin-bottom: 1.5rem;
             color: var(--text-dark);
+        }
+
+        /* Align chart cards to have the same height */
+        .columns.chart-row {
+            align-items: stretch;
+        }
+
+        .columns.chart-row > .column {
+            display: flex;
+        }
+
+        .columns.chart-row > .column .chart-card {
+            flex: 1;
         }
 
         /* Students Section */
@@ -361,6 +377,9 @@
                 <li><a onclick="showSection('programme')"><i class="fas fa-calendar-alt mr-3"></i> Programme</a></li>
                 <li><a onclick="showSection('reservations')"><i class="fas fa-clock mr-3"></i> Réservations</a></li>
                 <li><a onclick="showSection('stats')"><i class="fas fa-chart-bar mr-3"></i> Statistiques</a></li>
+                <li><a onclick="showSection('messagerie')"><i class="fas fa-envelope mr-3"></i> Messagerie</a></li> 
+                <li><a onclick="showSection('questionnaire')"><i class="fas fa-question-circle mr-3"></i> Questionnaire</a></li> 
+
                 <li><a onclick="showSection('monetisation')"><i class="fas fa-money-bill mr-3"></i> Monétisation</a></li>
             </ul>
         </aside>
@@ -444,10 +463,10 @@
         </div>
 
         <!-- Charts Section -->
-        <div class="columns">
+        <div class="columns chart-row">
             <div class="column is-8">
                 <div class="chart-card">
-                    <h3><i class="fas fa-chart-bar mr-2"></i> Nouveaux clients au cours du des années</h3>
+                    <h3><i class="fas fa-chart-bar mr-2"></i> Nouveaux clients au cours de l'année</h3>
                     <canvas id="usersChart"></canvas>
                 </div>
             </div>
@@ -568,7 +587,7 @@
         new Chart(sessionsCtx, {
             type: 'doughnut',
             data: {
-                labels: ['Cardio', 'renforcement', 'haltérophilie', 'mobilité'],
+                labels: ['Compétition', 'Perte de poids', 'Prise de masse', 'Remise en forme'],
                 datasets: [{
                     data: [35, 30, 20, 15],
                     backgroundColor: ['#ffd700', '#4a7ba7', '#50c878', '#9b59b6'],
